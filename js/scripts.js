@@ -1,63 +1,96 @@
-document.addEventListener('DOMContentLoaded', generateGrid);
-
-function generateGrid() {
-    const gridContainer = document.getElementById('gameGrid');
-
-    // Genera le celle della griglia
-    for (let i = 1; i <= 100; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'grid-cell';
-        cell.textContent = i;
-
-        // Aggiungi l'evento di click a ogni cella
-        cell.addEventListener('click', () => handleCellClick(cell, i));
-
-        gridContainer.appendChild(cell);
-    }
-}
-
-function handleCellClick(cell, cellNumber) {
-    // Cambia il colore della cella cliccata
-    cell.style.backgroundColor = 'lightblue';
-
-    // Visualizza il numero della cella nella console
-    console.log(`Cella cliccata: ${cellNumber}`);
-}
-
-function generateRandomBombs(totalCells, bombCount) {
-      const bombs = [];
-      
-      while (bombs.length < bombCount) {
-          const randomBomb = Math.floor(Math.random() * totalCells) + 1;
-  
-          // Verifica se il numero è già presente nell'array delle bombe
-          if (!bombs.includes(randomBomb)) {
-              bombs.push(randomBomb);
-          }
-      }
-  
-      return bombs;
-}
-
 document.addEventListener('DOMContentLoaded', generateGame);
 
 function generateGame() {
-    const totalCells = 100;
-    const bombCount = 16;
+  const totalCells = 100;
+  const bombCount = 16;
+  const gridContainer = document.getElementById('gameGrid');
+  const bombs = generateRandomBombs(totalCells, bombCount);
 
-    const gridContainer = document.getElementById('gameGrid');
-    const bombs = generateRandomBombs(totalCells, bombCount);
+  for (let i = 1; i <= totalCells; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'grid-cell';
+    cell.textContent = i;
 
-    for (let i = 1; i <= totalCells; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'grid-cell';
-        cell.textContent = i;
-
-        // Aggiungi l'evento di click a ogni cella
-        cell.addEventListener('click', () => handleCellClick(cell, i, bombs));
-
-        gridContainer.appendChild(cell);
+    // Aggiungi la classe 'bomb' alle caselle che contengono bombe
+    if (bombs.includes(i)) {
+      cell.classList.add('bomb');
     }
 
-    console.log('Bombe:', bombs);
+    cell.addEventListener('click', () => handleCellClick(cell, i, bombs));
+
+    gridContainer.appendChild(cell);
+  }
+
+  console.log('Bombe:', bombs);
+}
+
+function generateRandomBombs(totalCells, bombCount) {
+  const bombs = [];
+
+  while (bombs.length < bombCount) {
+    const randomBomb = Math.floor(Math.random() * totalCells) + 1;
+
+    if (!bombs.includes(randomBomb)) {
+      bombs.push(randomBomb);
+    }
+  }
+
+  return bombs;
+}
+
+function handleCellClick(cell, cellNumber, bombs) {
+  if (bombs.includes(cellNumber)) {
+    // La cella cliccata è una bomba
+    revealAllBombs();
+    alert('Boom! Hai colpito una bomba! Partita terminata.');
+  } else {
+    // La cella cliccata non è una bomba
+    cell.style.backgroundColor = 'lightblue';
+    console.log(`Cella cliccata: ${cellNumber}`);
+  }
+}
+
+function revealAllBombs() {
+  // Ottieni tutte le caselle che contengono bombe
+  const bombCells = document.querySelectorAll('.bomb');
+
+  // Rendi rosse tutte le caselle che contengono bombe
+  bombCells.forEach((bombCell) => {
+    bombCell.style.backgroundColor = 'red';
+  });
+
+  // Disabilita la possibilità di cliccare su altre caselle
+  const allCells = document.querySelectorAll('.grid-cell');
+  allCells.forEach((cell) => {
+    cell.removeEventListener('click', handleCellClick);
+  });
+}
+
+function handleCellClick(cell, cellNumber, bombs) {
+  if (bombs.includes(cellNumber)) {
+    // La cella cliccata è una bomba
+    revealAllBombs();
+    revealNonBombCells();
+    alert('Boom! Hai colpito una bomba! Partita terminata.');
+  } else {
+    // La cella cliccata non è una bomba
+    cell.style.backgroundColor = 'lightblue';
+    console.log(`Cella cliccata: ${cellNumber}`);
+  }
+}
+
+function revealNonBombCells() {
+  // Ottieni tutte le caselle che non contengono bombe
+  const nonBombCells = document.querySelectorAll('.grid-cell:not(.bomb)');
+
+  // Rendi azzurre tutte le caselle che non contengono bombe
+  nonBombCells.forEach((cell) => {
+    cell.style.backgroundColor = 'lightblue';
+  });
+
+  // Disabilita la possibilità di cliccare su altre caselle
+  const allCells = document.querySelectorAll('.grid-cell');
+  allCells.forEach((cell) => {
+    cell.removeEventListener('click', handleCellClick);
+  });
 }
